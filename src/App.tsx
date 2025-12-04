@@ -31,7 +31,8 @@ import { AddProviderDialog } from "@/components/providers/AddProviderDialog";
 import { EditProviderDialog } from "@/components/providers/EditProviderDialog";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { SettingsPage } from "@/components/settings/SettingsPage";
-import { UpdateBadge } from "@/components/UpdateBadge";
+// 更新功能已隐藏
+// import { UpdateBadge } from "@/components/UpdateBadge";
 import { EnvWarningBanner } from "@/components/env/EnvWarningBanner";
 import UsageScriptModal from "@/components/UsageScriptModal";
 import UnifiedMcpPanel from "@/components/mcp/UnifiedMcpPanel";
@@ -403,12 +404,12 @@ function App() {
               <>
                 <div className="flex items-center gap-2">
                   <a
-                    href="https://github.com/farion1231/cc-switch"
+                    href="https://nicerouter.com/"
                     target="_blank"
                     rel="noreferrer"
                     className="text-xl font-semibold text-blue-500 transition-colors hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300"
                   >
-                    CC Switch
+                    NiceCode
                   </a>
                   <Button
                     variant="ghost"
@@ -420,7 +421,8 @@ function App() {
                     <Settings className="h-4 w-4" />
                   </Button>
                 </div>
-                <UpdateBadge onClick={() => setCurrentView("settings")} />
+                {/* 更新功能已隐藏 */}
+                {/* <UpdateBadge onClick={() => setCurrentView("settings")} /> */}
               </>
             )}
           </div>

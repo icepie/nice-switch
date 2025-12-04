@@ -128,15 +128,48 @@ export function ProviderForm({
     initialCategory: initialData?.category,
   });
 
+  // 预设条目（需要在使用前定义）
+  const presetEntries = useMemo(() => {
+    if (appId === "codex") {
+      return codexProviderPresets.map<PresetEntry>((preset, index) => ({
+        id: `codex-${index}`,
+        preset,
+      }));
+    } else if (appId === "gemini") {
+      return geminiProviderPresets.map<PresetEntry>((preset, index) => ({
+        id: `gemini-${index}`,
+        preset,
+      }));
+    }
+    return providerPresets.map<PresetEntry>((preset, index) => ({
+      id: `claude-${index}`,
+      preset,
+    }));
+  }, [appId]);
+
+  // 找到 NiceCode 预设的 ID（用于默认选中）
+  const niceCodePresetId = useMemo(() => {
+    const niceCodeEntry = presetEntries.find(
+      (entry) => entry.preset.name === "NiceCode",
+    );
+    return niceCodeEntry?.id ?? null;
+  }, [presetEntries]);
+
   useEffect(() => {
-    setSelectedPresetId(initialData ? null : "custom");
+    // 新建模式：默认选中 NiceCode（如果存在），否则选中自定义
+    if (!initialData) {
+      const defaultId = niceCodePresetId ?? "custom";
+      setSelectedPresetId(defaultId);
+    } else {
+      setSelectedPresetId(null);
+    }
     setActivePreset(null);
 
     // 编辑模式不需要恢复 draftCustomEndpoints，端点已通过 API 管理
     if (!initialData) {
       setDraftCustomEndpoints([]);
     }
-  }, [appId, initialData]);
+  }, [appId, initialData, niceCodePresetId]);
 
   const defaultValues: ProviderFormData = useMemo(
     () => ({
@@ -236,6 +269,66 @@ export function ProviderForm({
     }
   }, [appId, initialData, selectedPresetId, resetCodexConfig]);
 
+  // 新建模式：初始化时自动应用 NiceCode 预设（如果存在）
+  useEffect(() => {
+    if (initialData || !selectedPresetId || selectedPresetId === "custom") {
+      return;
+    }
+
+    const entry = presetEntries.find((item) => item.id === selectedPresetId);
+    if (!entry) {
+      return;
+    }
+
+    // 自动应用预设配置
+    setActivePreset({
+      id: selectedPresetId,
+      category: entry.preset.category,
+      isPartner: entry.preset.isPartner,
+      partnerPromotionKey: entry.preset.partnerPromotionKey,
+    });
+
+    if (appId === "codex") {
+      const preset = entry.preset as CodexProviderPreset;
+      const auth = preset.auth ?? {};
+      const config = preset.config ?? "";
+      resetCodexConfig(auth, config);
+      form.reset({
+        name: preset.name,
+        websiteUrl: preset.websiteUrl ?? "",
+        settingsConfig: JSON.stringify({ auth, config }, null, 2),
+        icon: preset.icon ?? "",
+        iconColor: preset.iconColor ?? "",
+      });
+    } else if (appId === "gemini") {
+      const preset = entry.preset as GeminiProviderPreset;
+      const env = (preset.settingsConfig as any)?.env ?? {};
+      const config = (preset.settingsConfig as any)?.config ?? {};
+      resetGeminiConfig(env, config);
+      form.reset({
+        name: preset.name,
+        websiteUrl: preset.websiteUrl ?? "",
+        settingsConfig: JSON.stringify(preset.settingsConfig, null, 2),
+        icon: preset.icon ?? "",
+        iconColor: preset.iconColor ?? "",
+      });
+    } else {
+      const preset = entry.preset as ProviderPreset;
+      const config = applyTemplateValues(
+        preset.settingsConfig,
+        preset.templateValues,
+      );
+      form.reset({
+        name: preset.name,
+        websiteUrl: preset.websiteUrl ?? "",
+        settingsConfig: JSON.stringify(config, null, 2),
+        icon: preset.icon ?? "",
+        iconColor: preset.iconColor ?? "",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPresetId, presetEntries, appId, initialData]);
+
   useEffect(() => {
     form.reset(defaultValues);
   }, [defaultValues, form]);
@@ -257,24 +350,6 @@ export function ProviderForm({
     }),
     [t],
   );
-
-  const presetEntries = useMemo(() => {
-    if (appId === "codex") {
-      return codexProviderPresets.map<PresetEntry>((preset, index) => ({
-        id: `codex-${index}`,
-        preset,
-      }));
-    } else if (appId === "gemini") {
-      return geminiProviderPresets.map<PresetEntry>((preset, index) => ({
-        id: `gemini-${index}`,
-        preset,
-      }));
-    }
-    return providerPresets.map<PresetEntry>((preset, index) => ({
-      id: `claude-${index}`,
-      preset,
-    }));
-  }, [appId]);
 
   // 使用模板变量 hook (仅 Claude 模式)
   const {

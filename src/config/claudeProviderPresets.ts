@@ -46,7 +46,8 @@ export interface ProviderPreset {
 }
 
 export const providerPresets: ProviderPreset[] = [
-  {
+  // 所有默认供应商已注释，仅保留自定义和 NiceCode
+  /* {
     name: "Claude Official",
     websiteUrl: "https://www.anthropic.com/claude-code",
     settingsConfig: {
@@ -364,5 +365,23 @@ export const providerPresets: ProviderPreset[] = [
     isPartner: true, // 合作伙伴
     partnerPromotionKey: "packycode", // 促销信息 i18n key
     icon: "packycode",
+  }, */
+  {
+    name: "NiceCode",
+    websiteUrl: "https://nicerouter.com/",
+    settingsConfig: {
+      env: {
+        ANTHROPIC_BASE_URL: "https://api.nicerouter.com",
+        ANTHROPIC_AUTH_TOKEN: "",
+      },
+    },
+    // 请求地址候选（用于地址管理/测速）
+    endpointCandidates: [
+      "https://api.nicerouter.com",
+    ],
+    category: "third_party",
+    isPartner: true, // 合作伙伴
+    partnerPromotionKey: "nicecode", // 促销信息 i18n key
+    icon: "nicecode",
   },
 ];

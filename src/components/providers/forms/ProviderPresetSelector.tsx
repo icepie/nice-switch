@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { FormLabel } from "@/components/ui/form";
 import { ClaudeIcon, CodexIcon, GeminiIcon } from "@/components/BrandIcons";
 import { Zap, Star } from "lucide-react";
+import { ProviderIcon } from "@/components/ProviderIcon";
 import type { ProviderPreset } from "@/config/claudeProviderPresets";
 import type { CodexProviderPreset } from "@/config/codexProviderPresets";
 import type { GeminiProviderPreset } from "@/config/geminiProviderPresets";
@@ -65,6 +66,12 @@ export function ProviderPresetSelector({
   const renderPresetIcon = (
     preset: ProviderPreset | CodexProviderPreset | GeminiProviderPreset,
   ) => {
+    // 优先使用 preset.icon（如 NiceCode）
+    if (preset.icon) {
+      return <ProviderIcon icon={preset.icon} name={preset.name} size={14} />;
+    }
+
+    // 如果没有 preset.icon，使用 theme.icon
     const iconType = preset.theme?.icon;
     if (!iconType) return null;
 
@@ -117,10 +124,52 @@ export function ProviderPresetSelector({
     };
   };
 
+  // 分离合作伙伴预设和普通预设
+  const partnerEntries: PresetEntry[] = [];
+  const regularEntries: PresetEntry[] = [];
+
+  categoryKeys.forEach((category) => {
+    const entries = groupedPresets[category];
+    if (!entries || entries.length === 0) return;
+    entries.forEach((entry) => {
+      if (entry.preset.isPartner) {
+        partnerEntries.push(entry);
+      } else {
+        regularEntries.push(entry);
+      }
+    });
+  });
+
   return (
     <div className="space-y-3">
       <FormLabel>{t("providerPreset.label")}</FormLabel>
       <div className="flex flex-wrap gap-2">
+        {/* 合作伙伴预设（优先级最高，显示在自定义之前） */}
+        {partnerEntries.map((entry) => {
+          const isSelected = selectedPresetId === entry.id;
+          return (
+            <button
+              key={entry.id}
+              type="button"
+              onClick={() => onPresetChange(entry.id)}
+              className={`${getPresetButtonClass(isSelected, entry.preset)} relative`}
+              style={getPresetButtonStyle(isSelected, entry.preset)}
+              title={
+                presetCategoryLabels[entry.preset.category ?? ""] ??
+                t("providerPreset.categoryOther", {
+                  defaultValue: "其他",
+                })
+              }
+            >
+              {renderPresetIcon(entry.preset)}
+              {entry.preset.name}
+              <span className="absolute -top-1 -right-1 flex items-center gap-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-md">
+                <Star className="h-2.5 w-2.5 fill-current" />
+              </span>
+            </button>
+          );
+        })}
+
         {/* 自定义按钮 */}
         <button
           type="button"
@@ -134,37 +183,27 @@ export function ProviderPresetSelector({
           {t("providerPreset.custom")}
         </button>
 
-        {/* 预设按钮 */}
-        {categoryKeys.map((category) => {
-          const entries = groupedPresets[category];
-          if (!entries || entries.length === 0) return null;
-          return entries.map((entry) => {
-            const isSelected = selectedPresetId === entry.id;
-            const isPartner = entry.preset.isPartner;
-            return (
-              <button
-                key={entry.id}
-                type="button"
-                onClick={() => onPresetChange(entry.id)}
-                className={`${getPresetButtonClass(isSelected, entry.preset)} relative`}
-                style={getPresetButtonStyle(isSelected, entry.preset)}
-                title={
-                  presetCategoryLabels[category] ??
-                  t("providerPreset.categoryOther", {
-                    defaultValue: "其他",
-                  })
-                }
-              >
-                {renderPresetIcon(entry.preset)}
-                {entry.preset.name}
-                {isPartner && (
-                  <span className="absolute -top-1 -right-1 flex items-center gap-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-md">
-                    <Star className="h-2.5 w-2.5 fill-current" />
-                  </span>
-                )}
-              </button>
-            );
-          });
+        {/* 普通预设按钮 */}
+        {regularEntries.map((entry) => {
+          const isSelected = selectedPresetId === entry.id;
+          return (
+            <button
+              key={entry.id}
+              type="button"
+              onClick={() => onPresetChange(entry.id)}
+              className={`${getPresetButtonClass(isSelected, entry.preset)} relative`}
+              style={getPresetButtonStyle(isSelected, entry.preset)}
+              title={
+                presetCategoryLabels[entry.preset.category ?? ""] ??
+                t("providerPreset.categoryOther", {
+                  defaultValue: "其他",
+                })
+              }
+            >
+              {renderPresetIcon(entry.preset)}
+              {entry.preset.name}
+            </button>
+          );
         })}
       </div>
       <p className="text-xs text-muted-foreground">{getCategoryHint()}</p>

@@ -31,7 +31,8 @@ export interface GeminiProviderPreset {
 }
 
 export const geminiProviderPresets: GeminiProviderPreset[] = [
-  {
+  // 所有默认供应商已注释，仅保留自定义和 NiceCode
+  /* {
     name: "Google Official",
     websiteUrl: "https://ai.google.dev/",
     apiKeyUrl: "https://aistudio.google.com/apikey",
@@ -83,6 +84,26 @@ export const geminiProviderPresets: GeminiProviderPreset[] = [
     model: "gemini-3-pro-preview",
     description: "自定义 Gemini API 端点",
     category: "custom",
+  }, */
+  {
+    name: "NiceCode",
+    websiteUrl: "https://nicerouter.com/",
+    settingsConfig: {
+      env: {
+        GOOGLE_GEMINI_BASE_URL: "https://api.nicerouter.com",
+        GEMINI_MODEL: "gemini-3-pro-preview",
+      },
+    },
+    baseURL: "https://api.nicerouter.com",
+    model: "gemini-3-pro-preview",
+    description: "NiceCode",
+    category: "third_party",
+    isPartner: true, // 合作伙伴
+    partnerPromotionKey: "nicecode", // 促销信息 i18n key
+    endpointCandidates: [
+      "https://api.nicerouter.com",
+    ],
+    icon: "nicecode",
   },
 ];
 

@@ -62,7 +62,8 @@ requires_openai_auth = true`;
 }
 
 export const codexProviderPresets: CodexProviderPreset[] = [
-  {
+  // 所有默认供应商已注释，仅保留自定义和 NiceCode
+  /* {
     name: "OpenAI Official",
     websiteUrl: "https://chatgpt.com/codex",
     isOfficial: true,
@@ -150,5 +151,22 @@ requires_openai_auth = true`,
     isPartner: true, // 合作伙伴
     partnerPromotionKey: "packycode", // 促销信息 i18n key
     icon: "packycode",
+  }, */
+  {
+    name: "NiceCode",
+    websiteUrl: "https://nicerouter.com/",
+    category: "third_party",
+    auth: generateThirdPartyAuth(""),
+    config: generateThirdPartyConfig(
+      "nicecode",
+      "https://api.nicerouter.com/v1",
+      "gpt-5.1-codex",
+    ),
+    endpointCandidates: [
+      "https://api.nicerouter.com/v1",
+    ],
+    isPartner: true, // 合作伙伴
+    partnerPromotionKey: "nicecode", // 促销信息 i18n key
+    icon: "nicecode",
   },
 ];
