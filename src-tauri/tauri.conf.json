@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "NiceCode",
+  "productName": "Nice-Switch",
   "version": "3.8.2",
   "identifier": "com.ccswitch.desktop",
   "build": {
